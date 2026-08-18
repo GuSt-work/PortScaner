@@ -1,0 +1,26 @@
+# Go build artifacts
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Debug binaries
+__debug_bin
+__debug_bin.exe
+
+# Go test
+*.test
+coverage.out
+
+# IDE
+.vscode/*
+!.vscode/launch.json
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Temporary files
+*.tmp
+*.log
