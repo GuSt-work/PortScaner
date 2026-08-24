@@ -3,8 +3,6 @@ package udp
 import (
 	argsparser "PortScaner/ArgsParser"
 	infrastruct "PortScaner/Infrastruction"
-
-	//"errors"
 	"fmt"
 	"net"
 	"syscall"

@@ -35,7 +35,7 @@ func (s PortState) String() string {
 		return "closed"
 
 	case PortFiltered:
-		return "filtered"
+		return "open|filtered"
 
 	default:
 		return "unknown"
@@ -59,7 +59,7 @@ func PrintHeader(ip string) {
 func PrintBody(result ScanResult, pcktCount uint) {
 
 	fmt.Printf(
-		"%-12s%-12s Open: %d/%d  Timeout: %d/%d  Closed: %d/%d\n",
+		"%-12s%-12s Open: %d/%d  Open|filtered: %d/%d  Closed: %d/%d\n",
 		fmt.Sprintf("%d/%s", result.Port, result.PortType),
 		result.State,
 		result.PacketsPortOpen, pcktCount,

@@ -1,13 +1,18 @@
 package main
 
 import (
-	//argsparser "PortScaner/ArgsParser"
 	argsparser "PortScaner/ArgsParser"
 	infrastruct "PortScaner/Infrastruction"
 	"errors"
 	"fmt"
 	"net"
+	"os"
 	"syscall"
+)
+
+const (
+	WSAECONNREFUSED = 10061
+	WSAETIMEDOUT    = 10060
 )
 
 func InitResult(
@@ -23,27 +28,49 @@ func InitResult(
 		PacketsPortClosed:  0,
 	}
 }
+
+func GetTCPPortState(err error) infrastruct.PortState {
+
+	if err == nil {
+		return infrastruct.PortOpen
+	}
+
+	var syscallErr *os.SyscallError
+
+	if errors.As(err, &syscallErr) {
+
+		errno, ok := syscallErr.Err.(syscall.Errno)
+
+		if ok {
+
+			switch errno {
+
+			case WSAECONNREFUSED:
+				return infrastruct.PortClosed
+
+			case WSAETIMEDOUT:
+				return infrastruct.PortFiltered
+			}
+		}
+	}
+
+	return infrastruct.PortFiltered
+}
+
 func SetResult(
 	currentResult *infrastruct.ScanResult,
 	err error,
 ) {
-	if err == nil {
+	result := GetTCPPortState(err)
+
+	switch result {
+	case infrastruct.PortOpen:
 		currentResult.PacketsPortOpen++
-		return
-	}
-
-	if errors.Is(err, syscall.ECONNREFUSED) {
-		currentResult.PacketsPortClosed++
-		return
-	}
-
-	if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
+	case infrastruct.PortFiltered:
 		currentResult.PacketsPortTimeout++
-		return
+	case infrastruct.PortClosed:
+		currentResult.PacketsPortClosed++
 	}
-
-	// Все остальные ошибки пока считаем закрытым портом.
-	currentResult.PacketsPortClosed++
 }
 
 func ScanTcp(
@@ -55,8 +82,6 @@ func ScanTcp(
 	result := InitResult(ip, port)
 
 	for count := uint(0); count < config.PacketsCount; count++ {
-
-		fmt.Println("Packets numb: ", count)
 
 		address := fmt.Sprintf(
 			"%s:%d",

@@ -4,8 +4,6 @@ import (
 	argsparser "PortScaner/ArgsParser"
 	infrastruct "PortScaner/Infrastruction"
 	udp "PortScaner/UDP"
-
-	//"fmt"
 	"net"
 )
 
